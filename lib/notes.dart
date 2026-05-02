@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:notes_app/add_note.dart';
+import 'package:notes_app/shimmer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
@@ -77,52 +78,95 @@ class NotesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 48),
-
-              // App title
-              const Text(
-                'Notes',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF1C1B1A),
-                  letterSpacing: -0.5,
-                ),
-              ),
-
-              Expanded(
-                child: isLoading ? Center(child: CircularProgressIndicator()) :
-                 users.isEmpty ? Center(
-                  child: Text(
-                    'No notes yet',
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: Color(0xFFB0AAA3),
-                      letterSpacing: 0.1,
-                    ),
-                  ),
-                ) :
-                 ListView.builder(
-                  itemCount: users.length,
-                  itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text("${users[index]['title']}"),
-                    subtitle: Text("${users[index]['description']}"),
-                  );
-                },),
-              ),
-
-              // Empty state — centered in remaining space
-              // const Expanded(
-              //   child: 
-              // ),
+      // body:     return Scaffold(
+      // Apply the 'Superb' Aesthetic Background
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment(-0.7, -0.6),
+            radius: 1.3,
+            colors: [
+              Color(0xFFFFFFFF), // Light source
+              Color(0xFFF2F0EC), // Soft paper tone
             ],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 48),
+                
+                // App title with tighter letter spacing for premium look
+                const Text(
+                  'Notes',
+                  style: TextStyle(
+                    fontSize: 34,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1C1B1A),
+                    letterSpacing: -1.0,
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                Expanded(
+                  child: isLoading 
+                    ? const Shimmerscreen() 
+                    : users.isEmpty 
+                      ? const Center(
+                          child: Text(
+                            'No notes yet',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Color(0xFFB0AAA3),
+                              letterSpacing: 0.1,
+                            ),
+                          ),
+                        ) 
+                      : ListView.builder(
+                          itemCount: users.length,
+                          padding: const EdgeInsets.only(top: 8),
+                          itemBuilder: (context, index) {
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 12),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.6),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: const Color(0xFF1C1B1A).withOpacity(0.05),
+                                ),
+                              ),
+                              child: ListTile(
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                                title: Text(
+                                  "${users[index]['title']}",
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 18,
+                                    color: Color(0xFF1C1B1A),
+                                  ),
+                                ),
+                                subtitle: Padding(
+                                  padding: const EdgeInsets.only(top: 4.0),
+                                  child: Text(
+                                    "${users[index]['description']}",
+                                    style: TextStyle(
+                                      color: const Color(0xFF1C1B1A).withOpacity(0.6),
+                                      fontSize: 14,
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

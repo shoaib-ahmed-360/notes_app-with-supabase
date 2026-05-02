@@ -36,6 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   supabase: ^2.10.6
   supabase_flutter: ^2.12.4
+  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:
