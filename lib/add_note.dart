@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -6,8 +7,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 // New Note Screen
 // ─────────────────────────────────────────────
 class NewNoteScreen extends StatefulWidget {
+
+    final Map<String, dynamic>? note; 
+
+  // 2. Add 'this.note' to the constructor
+  const NewNoteScreen({super.key, this.note}); 
   
- const  NewNoteScreen({super.key});
+//  const  NewNoteScreen({super.key});
 
   @override
   State<NewNoteScreen> createState() => NewNoteScreenState();
@@ -15,8 +21,20 @@ class NewNoteScreen extends StatefulWidget {
 }
 
 class NewNoteScreenState extends State<NewNoteScreen> {
-  TextEditingController titlecnt = TextEditingController();
-   TextEditingController descriptioncnt = TextEditingController();
+
+
+late TextEditingController titlecnt;
+late TextEditingController descriptioncnt;
+
+@override
+void initState(){
+super.initState() ;
+
+titlecnt = TextEditingController(text: widget.note? ['title']?? "");
+descriptioncnt = TextEditingController(text: widget.note? ['description']?? "");
+}
+  // TextEditingController titlecnt = TextEditingController();
+  //  TextEditingController descriptioncnt = TextEditingController();
 
    bool is_loading = false;
 
@@ -25,11 +43,19 @@ class NewNoteScreenState extends State<NewNoteScreen> {
       setState(() {
         is_loading = true;
       });
-      await Supabase.instance.client.from("tblnote").insert({
+      if (widget.note == null ) {
+          await Supabase.instance.client.from("tblnote").insert({
         "title" : title,
         "description" : Description,
       }
       );
+      }
+      else{
+        await Supabase.instance.client.
+        from("tblnote").update({'title' :title , 'description' : Description})
+        .eq("id", widget.note!['id']);
+      }
+    
     } catch (e) {
       print(e);
     }

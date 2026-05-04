@@ -23,15 +23,21 @@ class _NotesAppState extends State<NotesApp> {
       setState(() {
         is_loading = true;
       });
-      dynamic data = await Supabase.instance.client.from("tblnote").select().order("id" , ascending: true);
+      dynamic data = await Supabase.instance.client.from("tblnote")
+      .select().order("id" , ascending: true);
       print(data);
       setState(() {
+
+        users = List<Map<String , dynamic>>.from(data);
         
+   
+      is_loading = false;
       
-      users.clear();
-      users = data;
       });
     } catch (e) {
+      setState(() {
+        is_loading = false;
+      });
       print(e);
     } finally {
       is_loading = false;
@@ -78,8 +84,7 @@ class NotesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // body:     return Scaffold(
-      // Apply the 'Superb' Aesthetic Background
+     
       body: Container(
         decoration: const BoxDecoration(
           gradient: RadialGradient(
@@ -130,6 +135,7 @@ class NotesScreen extends StatelessWidget {
                           itemCount: users.length,
                           padding: const EdgeInsets.only(top: 8),
                           itemBuilder: (context, index) {
+                             if (index >= users.length) return const SizedBox.shrink();
                             return Container(
                               margin: const EdgeInsets.only(bottom: 12),
                               decoration: BoxDecoration(
@@ -140,6 +146,58 @@ class NotesScreen extends StatelessWidget {
                                 ),
                               ),
                               child: ListTile(
+                              onTap: () async {
+                            // 1. Pass the whole map: users[index]
+                        final result = await Navigator.push(
+                       context, 
+                        MaterialPageRoute(
+                        builder: (context) => NewNoteScreen(note: users[index]), 
+                     ),
+                      );
+
+                        // 2. Refresh the list if an update happened
+                     if (result == true) {
+                       onrefresh();
+                            }
+                             },
+                                onLongPress: () {
+                                  showDialog(context: context, builder: (context) {
+                                    return AlertDialog(
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+  icon: const Icon(Icons.delete_outline, color: Colors.red, size: 40),
+  title: const Text("Delete Note?"),
+  content: const Text(
+    "This action cannot be undone. Are you sure you want to permanently delete this note?",
+    textAlign: TextAlign.center,
+  ),
+  actionsAlignment: MainAxisAlignment.spaceEvenly,
+  actions: [
+    TextButton(
+      onPressed: () => Navigator.pop(context),
+      child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
+    ),
+    ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.red.shade400,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+      onPressed: () async {
+        await Supabase.instance.client
+            .from("tblnote")
+            .delete()
+            .eq("id", users[index]['id']);
+        onrefresh();
+        Navigator.pop(context);
+      },
+      child: const Text("Delete"),
+    ),
+  ],
+);
+
+                                  },);
+                                  
+                                },
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                                 title: Text(
                                   "${users[index]['title']}",
